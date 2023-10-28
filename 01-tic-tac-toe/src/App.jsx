@@ -1,66 +1,60 @@
 import { useState } from 'react'
-import confetti from "canvas-confetti"
+import confetti from 'canvas-confetti'
 import './App.css'
-import { Square } from "./components/Square"
+import { Square } from './components/Square'
 import { TURNS } from './constants'
 import { checkWinnerFrom } from './logic/board'
 import { WinnerModal } from './components/WinnerModal'
 
-
-
-
-function App() {
-  const [board, setBoard] = useState(()=>{
-    const savedBoard = localStorage.getItem('board');
+function App () {
+  const [board, setBoard] = useState(() => {
+    const savedBoard = localStorage.getItem('board')
     if (savedBoard) {
-      return JSON.parse(savedBoard);
+      return JSON.parse(savedBoard)
     }
-    return Array(9).fill(null);
-  });
-  const [turn, setTurn] = useState(()=>{
-    const savedTurn = localStorage.getItem('turn');
+    return Array(9).fill(null)
+  })
+  const [turn, setTurn] = useState(() => {
+    const savedTurn = localStorage.getItem('turn')
     if (savedTurn) {
-      return savedTurn;
+      return savedTurn
     }
-    return TURNS.X;
-  });
+    return TURNS.X
+  })
   const [winner, setWinner] = useState(null)
 
   const resetGame = () => {
-    setBoard(Array(9).fill(null));
-    setTurn(TURNS.X);
-    setWinner(null);
+    setBoard(Array(9).fill(null))
+    setTurn(TURNS.X)
+    setWinner(null)
 
-
-    localStorage.removeItem('board');
-    localStorage.removeItem('turn');
+    localStorage.removeItem('board')
+    localStorage.removeItem('turn')
   }
   const checkEndGame = (newBoard) => {
     return newBoard.every((square) => square !== null)
   }
 
   const updateBoard = (index) => {
-    if (board[index] || winner) return;
+    if (board[index] || winner) return
 
-    const newBoard = [...board];
-    newBoard[index] = turn;
-    setBoard(newBoard);
+    const newBoard = [...board]
+    newBoard[index] = turn
+    setBoard(newBoard)
 
-    const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
-    setTurn(newTurn);
+    const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
+    setTurn(newTurn)
 
-    localStorage.setItem('board',JSON.stringify(newBoard));
+    localStorage.setItem('board', JSON.stringify(newBoard))
     localStorage.setItem('turn', newTurn)
 
-    const newWinner = checkWinnerFrom(newBoard);
+    const newWinner = checkWinnerFrom(newBoard)
     if (newWinner) {
       confetti()
-      setWinner(newWinner);
+      setWinner(newWinner)
     } else if (checkEndGame(newBoard)) {
       setWinner(false)
     }
-
-
   }
   return (
     <main className='board'>
@@ -90,11 +84,9 @@ function App() {
         </Square>
       </section>
 
-
       <WinnerModal resetGame={resetGame} winner={winner} />
     </main>
   )
-
 }
 
 export default App

@@ -1,0 +1,21 @@
+.page{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+main{
+  display: flex;
+  flex-direction: column;
+}
+main ul{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+}
+form{
+  display: flex;
+  justify-content: center;
+}

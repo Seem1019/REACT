@@ -1,21 +1,91 @@
 import './App.css'
-import { Movies } from './components/Movies.jsx'
 import { useMovies } from './hooks/useMovies.js'
+import { Movies } from './components/Movies.jsx'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import debounce from 'just-debounce-it'
+
+function useSearch () {
+  const [search, updateSearch] = useState('')
+  const [error, setError] = useState(null)
+  const isFirstInput = useRef(true)
+
+  useEffect(() => {
+    if (isFirstInput.current) {
+      isFirstInput.current = search === ''
+      return
+    }
+
+
+
+    if (search.match(/^\d+$/)) {
+      setError('The search cant be just a number')
+      return
+    }
+
+    if (search.length < 2) {
+      setError('Search length must been 3 or plus characters')
+      return
+    }
+
+    setError(null)
+  }, [search])
+
+  return { search, updateSearch, error }
+}
+
 function App () {
-  const { movies: mappedMovies } = useMovies()
+  const [sort, setSort] = useState(false)
+
+  const { search, updateSearch, error } = useSearch()
+  const { movies, loading, getMovies } = useMovies({ search, sort })
+
+  const debouncedGetMovies = useCallback(
+    debounce(search => {
+      console.log('search', search)
+      getMovies({ search })
+    }, 300)
+    , [getMovies]
+  )
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    getMovies({ search })
+  }
+
+  const handleSort = () => {
+    if(!search)
+    return
+    setSort(!sort)
+  }
+
+  const handleChange = (event) => {
+    const newSearch = event.target.value
+    updateSearch(newSearch)
+    debouncedGetMovies(newSearch)
+  }
 
   return (
     <div className='page'>
+
       <header>
         <h1>Movies finder</h1>
-        <form className='mf-form'>
-          <input placeholder='Title...' />
+        <form className='form' onSubmit={handleSubmit}>
+          <input
+            style={{
+              border: '1px solid transparent',
+              borderColor: error ? 'red' : 'transparent'
+            }} onChange={handleChange} value={search} name='query' placeholder='Avengers, Star Wars, The Matrix...'
+          />
+          <input type='checkbox' onChange={handleSort} checked={sort}  />
           <button type='submit'>Search</button>
         </form>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </header>
 
       <main>
-        <Movies movies={mappedMovies} />
+        {
+          loading ? <p>loading...</p> : <Movies movies={movies} />
+        }
       </main>
     </div>
   )
